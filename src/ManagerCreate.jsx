@@ -127,7 +127,7 @@ const getHelpContent = (page) => {
         </ol>
         
         <div style={{ backgroundColor: '#fff3cd', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>
-          <strong>💡 ポイント：</strong> シフト作成時に1年半前の古いデータは自動的に削除されます
+          <strong>💡 ポイント：</strong> シフト作成時に2年以上前の古いデータは自動的に削除されます（シフト希望・確定シフト・打刻ログ・通知履歴）
         </div>
       </div>
     ),
@@ -1195,7 +1195,7 @@ useEffect(() => {
 
     try {
       const oneAndHalfYearsAgo = new Date(sd + 'T00:00:00');
-      oneAndHalfYearsAgo.setMonth(oneAndHalfYearsAgo.getMonth() - 18);
+      oneAndHalfYearsAgo.setMonth(oneAndHalfYearsAgo.getMonth() - 24);
       const oneAndHalfYearsAgoStr = localDateStr(oneAndHalfYearsAgo);
 
       const { error: deleteShiftsError } = await supabase
@@ -1214,6 +1214,30 @@ useEffect(() => {
 
       if (deleteFinalShiftsError) {
         console.error('古いfinal_shiftsデータ削除エラー:', deleteFinalShiftsError);
+      }
+
+      const { error: deleteNotifError } = await supabase
+        .from('notifications')
+        .delete()
+        .lt('created_at', oneAndHalfYearsAgoStr);
+      if (deleteNotifError) {
+        console.error('古いnotificationsデータ削除エラー:', deleteNotifError);
+      }
+
+      const { error: deleteAttendError } = await supabase
+        .from('attendance_logs')
+        .delete()
+        .lt('action_date', oneAndHalfYearsAgoStr);
+      if (deleteAttendError) {
+        console.error('古いattendance_logsデータ削除エラー:', deleteAttendError);
+      }
+
+      const { error: deletePeriodsError } = await supabase
+        .from('shift_periods')
+        .delete()
+        .lt('period_end', oneAndHalfYearsAgoStr);
+      if (deletePeriodsError) {
+        console.error('古いshift_periodsデータ削除エラー:', deletePeriodsError);
       }
 
       const { data: shifts, error: shiftError } = await supabase
