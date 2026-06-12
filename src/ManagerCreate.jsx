@@ -1860,7 +1860,7 @@ if (!showTable) {
 </button>
         </div>
         <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-          シフト作成時に1年半前の古いデータは自動削除されます
+          シフト作成時に2年前の古いデータは自動削除されます
         </p>
         <label>開始日:</label>
         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
