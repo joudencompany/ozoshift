@@ -32,11 +32,6 @@ const PasswordReset = ({ onBack, onSuccess }) => {
       return;
     }
 
-    if (!currentPassword) {
-      setError('現在のパスワードを入力してください');
-      setLoading(false);
-      return;
-    }
 
     if (newPassword.length < 6) {
       setError('新しいパスワードは6文字以上にしてください');
@@ -65,19 +60,14 @@ const PasswordReset = ({ onBack, onSuccess }) => {
         return;
       }
 
-      // 現在のパスワードが設定されていない場合
-      if (!user.user_password) {
-        setError('パスワードが設定されていません。管理者に連絡してください');
-        setLoading(false);
-        return;
-      }
-
-      // 現在のパスワードを確認
-      const hashedCurrentPassword = await hashPassword(currentPassword);
-      if (hashedCurrentPassword !== user.user_password) {
-        setError('現在のパスワードが違います');
-        setLoading(false);
-        return;
+      // パスワードが設定済みの場合のみ現在のパスワードを照合
+      if (user.user_password) {
+        const hashedCurrentPassword = await hashPassword(currentPassword);
+        if (hashedCurrentPassword !== user.user_password) {
+          setError('現在のパスワードが違います');
+          setLoading(false);
+          return;
+        }
       }
 
       // 新しいパスワードをハッシュ化
@@ -142,7 +132,7 @@ const PasswordReset = ({ onBack, onSuccess }) => {
       <div className="login-card">
         <h2>パスワード変更</h2>
         <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-          現在のパスワードを入力して、新しいパスワードを設定してください
+          現在のパスワードを入力して、新しいパスワードを設定してください（未設定の場合は現在のパスワード欄を空欄にしてください）
         </p>
         <div>
           <input
