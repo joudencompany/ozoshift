@@ -1395,7 +1395,8 @@ const handleEditStart = async (dateIndex = 0, datesOverride) => {
 role: shift.role || shiftSettings.defaultRole,
         isEditingStore: false,
         isEditingRole: false,
-        remarks: shift.remarks || ''
+        remarks: shift.remarks || '',
+        manager_memo: shift.manager_memo || ''
       };
     });
   setEditRows(rows);
@@ -1511,7 +1512,8 @@ const handleStoreSelect = (index, value) => {
         is_off: row.isOff,
         store: storeValue,
         role: roleValue,
-        is_boshu: row.isBoshu ? true : false
+        is_boshu: row.isBoshu ? true : false,
+        manager_memo: row.manager_memo || null
       };
 
       if (row.isBoshu) {
@@ -1641,7 +1643,8 @@ const handleStoreSelect = (index, value) => {
     role: shiftSettings.defaultRole,      // ← 追加
     isEditingStore: false,
     isEditingRole: false,                 // ← 追加
-    remarks: ''
+    remarks: '',
+    manager_memo: ''
   };
 
   console.log('Adding new row:', newRow);
@@ -1672,7 +1675,8 @@ const handleAddBoshu = () => {
     isEditingStore: false,
     isEditingRole: false,
     remarks: '',
-    isBoshu: true  // 募集フラグ
+    isBoshu: true,
+    manager_memo: ''
   };
   setEditRows([...editRows, boshuRow]);
 };
@@ -2083,6 +2087,7 @@ if (!showTable) {
                   <th style={{ minWidth: '25px', width: '25px', position: 'sticky', left: '125px', zIndex: 3, backgroundColor: '#E6E6FA', border: '1px solid #ddd', color: 'black', fontSize: '0.65rem', padding: '0.1rem' }}>休</th>
                   <th style={{ minWidth: '85px', width: '85px', position: 'sticky', left: '150px', zIndex: 3, backgroundColor: '#98FB98', border: '1px solid #ddd', color: 'black', fontSize: '0.65rem', padding: '0.1rem' }}>開始</th>
                   <th style={{ minWidth: '85px', width: '85px', position: 'sticky', left: '235px', zIndex: 3, backgroundColor: '#FFE4B5', border: '1px solid #ddd', color: 'black', fontSize: '0.65rem', padding: '0.1rem' }}>終了</th>
+                  <th style={{ minWidth: '80px', width: '80px', backgroundColor: '#C8E6C9', border: '1px solid #ddd', color: 'black', fontSize: '0.65rem', padding: '0.1rem' }}>店長メモ</th>
                   {timeSlots.map((t, i) => (
                     <th key={i} style={{ minWidth: '28px', width: '28px', backgroundColor: '#F0E68C', border: '1px solid #ddd', color: 'black', fontSize: '0.7rem', padding: '0.1rem' }}>{t}</th>
                   ))}
@@ -2241,6 +2246,15 @@ return (
                             ))}
                           </select>
                         </div>
+                      </td>
+                      <td style={{ minWidth: '80px', width: '80px', padding: '0.1rem', border: '1px solid #ddd' }}>
+                        <input
+                          type="text"
+                          value={row.manager_memo || ''}
+                          onChange={e => handleTimeChange(rowIndex, 'manager_memo', e.target.value)}
+                          placeholder="店長メモ"
+                          style={{ width: '100%', boxSizing: 'border-box', fontSize: '0.6rem', border: '1px solid #ccc', borderRadius: '2px', padding: '0.05rem' }}
+                        />
                       </td>
                      
 {timeSlots.map((slot, colIndex) => {
