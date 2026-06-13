@@ -922,13 +922,7 @@ const handleTimeSlotClick = (shiftId, slotTime) => {
   };
 
   const isOffDay = (shift) => {
-    return shift.is_off === true ||
-           !shift.start_time ||
-           !shift.end_time ||
-           shift.start_time === '' ||
-           shift.end_time === '' ||
-           (shift.start_time === '00:00' && shift.end_time === '00:00') ||
-           (shift.start_time === '00:00:00' && shift.end_time === '00:00:00');
+    return shift.is_off === true;
   };
 
   const calendarDays = generateCalendarDays();
