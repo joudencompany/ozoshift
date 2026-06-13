@@ -330,7 +330,7 @@ const [showDeleted, setShowDeleted] = useState(false);
         .eq('id', user.id);
 
       if (error) {
-        alert('パスワード変更に失敗しました');
+        alert('パスワード変更に失敗しました: ' + error.message);
       } else {
         alert('パスワードを変更しました');
         setEditingUser(null);
