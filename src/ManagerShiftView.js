@@ -436,6 +436,7 @@ function ManagerShiftView({ onBack }) {
   const [shiftData, setShiftData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userMap, setUserMap] = useState({});
+  const [userList, setUserList] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availableDates, setAvailableDates] = useState([]);
   const [boshuCountMap, setBoshuCountMap] = useState({});
@@ -464,9 +465,9 @@ const [shiftSettings, setShiftSettings] = useState(() => {
   }
   return {
     stores: ['A', 'B'],
-    roles: ['社員', 'アルバイト'],
+    roles: ['A', 'B'],
     defaultStore: 'A',
-    defaultRole: '社員'
+    defaultRole: 'A'
   };
 });
 
@@ -539,6 +540,10 @@ const [shiftSettings, setShiftSettings] = useState(() => {
       });
     }
     setUserMap(userMapTemp);
+    setUserList((data || []).filter(u => u.manager_number != null && u.name).map(u => ({
+      manager_number: u.manager_number,
+      name: u.name
+    })));
   };
 
   const fetchShiftData = async (date) => {
@@ -733,13 +738,20 @@ const [shiftSettings, setShiftSettings] = useState(() => {
         store: storeValue,
         role: roleValue,  // ← 追加
         is_off: shift.is_off,
-        remarks: shift.remarks || null
+        remarks: shift.remarks || null,
+        notes: shift.notes || null
       };
 
       let error;
       if (shift.isNew) {
-        updateData.is_boshu = true;
+        updateData.is_boshu = !shift.manager_number;
         const result = await supabase.from('final_shifts').insert(updateData);
+        error = result.error;
+      } else if (shift.id) {
+        const result = await supabase
+          .from('final_shifts')
+          .update(updateData)
+          .eq('id', shift.id);
         error = result.error;
       } else {
         const result = await supabase
@@ -1387,8 +1399,37 @@ const handleTimeSlotClick = (shiftId, slotTime) => {
     const isBoshu = shift.is_boshu === true;
     return (
       <tr key={shift.id || shift.manager_number || index} className={editingShift.is_off ? 'off-row' : ''} style={isBoshu ? { backgroundColor: '#fff0f0' } : {}}>
-        <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: isBoshu ? '#fff0f0' : 'white', border: '1px solid #ddd', padding: '0.2rem', fontSize: '0.65rem', color: isBoshu ? '#f44336' : '#000', fontWeight: isBoshu ? 'bold' : 'normal', minWidth: '50px', width: '50px' }}>
-          {isBoshu ? '募集' : getUserName(shift.manager_number)}
+        <td style={{ position: 'sticky', left: 0, zIndex: 2, backgroundColor: isBoshu ? '#fff0f0' : 'white', border: '1px solid #ddd', padding: '0.2rem', fontSize: '0.65rem', color: isBoshu ? '#f44336' : '#000', fontWeight: isBoshu ? 'bold' : 'normal', minWidth: '60px', width: '60px' }}>
+          {isBoshu ? (
+            <div>
+              <select
+                value={editingShift.manager_number != null ? String(editingShift.manager_number) : ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const shiftKey = shift.id || shift.manager_number;
+                  const updated = editingShifts.map(s => {
+                    if (s.id === shiftKey || (s.manager_number === shiftKey && !s.id)) {
+                      return { ...s, manager_number: val || null, is_boshu: val ? false : true };
+                    }
+                    return s;
+                  });
+                  setEditingShifts(updated);
+                }}
+                style={{ width: '100%', fontSize: '0.55rem', padding: '0.1rem', boxSizing: 'border-box' }}
+              >
+                <option value="">--選択--</option>
+                {userList.map(u => (
+                  <option key={u.manager_number} value={String(u.manager_number)}>{u.name}</option>
+                ))}
+              </select>
+              <input
+                placeholder="自由入力"
+                value={editingShift.notes || ''}
+                onChange={(e) => handleShiftChange(shift.id || shift.manager_number, 'notes', e.target.value)}
+                style={{ width: '100%', fontSize: '0.55rem', padding: '0.1rem', border: '1px solid #ddd', borderRadius: '2px', boxSizing: 'border-box', marginTop: '2px' }}
+              />
+            </div>
+          ) : getUserName(shift.manager_number)}
         </td>
         <td style={{ position: 'sticky', left: '50px', zIndex: 2, backgroundColor: isBoshu ? '#fff0f0' : 'white', border: '1px solid #ddd', padding: '0.1rem', minWidth: '60px', width: '60px' }}>
           <select

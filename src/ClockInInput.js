@@ -1900,12 +1900,12 @@ if (step === 'edit') {
             }}>
               {style.label}
             </div>
-            <div style={{ 
-              fontSize: '1.3rem', 
+            <div style={{
+              fontSize: '1.3rem',
               fontWeight: 'bold',
               color: '#333'
             }}>
-              {log.action_time}
+              {log.action_time?.substring(0, 5)}
             </div>
           </div>
         {log.is_modified && (
@@ -2263,13 +2263,16 @@ if (step === 'edit') {
       }}
       style={{
         width: '100%',
-        padding: '0.6rem',
-        fontSize: '1.1rem',
+        boxSizing: 'border-box',
+        padding: '0.75rem',
+        fontSize: '1.3rem',
         border: `2px solid ${style.border}`,
         borderRadius: '6px',
         textAlign: 'center',
         fontWeight: 'bold',
-        backgroundColor: style.bg
+        backgroundColor: style.bg,
+        minHeight: '50px',
+        touchAction: 'manipulation'
       }}
       step="60"
     />

@@ -502,9 +502,9 @@ const RecruitmentSettingsModal = ({ isOpen, onClose }) => {
 // 設定モーダルコンポーネント
 const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
   const [stores, setStores] = useState(settings.stores || ['A', 'B']);
-  const [roles, setRoles] = useState(settings.roles || ['社員', 'アルバイト']);
+  const [roles, setRoles] = useState(settings.roles || ['A', 'B']);
   const [defaultStore, setDefaultStore] = useState(settings.defaultStore || 'A');
-  const [defaultRole, setDefaultRole] = useState(settings.defaultRole || '社員');
+  const [defaultRole, setDefaultRole] = useState(settings.defaultRole || 'A');
   const [newStore, setNewStore] = useState('');
   const [newRole, setNewRole] = useState('');
   
@@ -1023,9 +1023,9 @@ const [shiftSettings, setShiftSettings] = useState(() => {
   }
   return {
     stores: ['A', 'B'],
-    roles: ['社員', 'アルバイト'],
+    roles: ['A', 'B'],
     defaultStore: 'A',
-    defaultRole: '社員'
+    defaultRole: 'A'
   };
 });
 // ── ドラフト管理 ──

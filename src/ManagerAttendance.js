@@ -559,9 +559,9 @@ const SummaryView = ({ userMap, availableDates, onBackToCalendar }) => {
     }
     return {
       stores: ['A', 'B'],
-      roles: ['社員', 'アルバイト'],
+      roles: ['A', 'B'],
       defaultStore: 'A',
-      defaultRole: '社員'
+      defaultRole: 'A'
     };
   });
 
@@ -614,7 +614,7 @@ const SummaryView = ({ userMap, availableDates, onBackToCalendar }) => {
 
   // ✅ 新しく追加: 役割リスト
   const roleList = useMemo(() => {
-    const roles = shiftSettings.roles || ['社員', 'アルバイト'];
+    const roles = shiftSettings.roles || ['A', 'B'];
     return [
       { value: '', label: '全役割' }, 
       ...roles.map(r => ({ value: r, label: r }))
@@ -697,7 +697,11 @@ const fetchAllAttendanceRecords = async () => {
   };
 
 const aggregatedData = useMemo(() => {
-    let recordsToAggregate = attendanceRecords.filter(record => record.work_minutes > 0);
+    let recordsToAggregate = attendanceRecords.filter(record =>
+      record.work_minutes > 0 &&
+      record.manager_number != null &&
+      record.manager_number !== ''
+    );
 
     recordsToAggregate = recordsToAggregate.filter(record => {
       const dateStr = record.date;
@@ -2679,7 +2683,7 @@ const changeDate = (delta) => {
       setAttendanceData(updated);
       setHasUnsavedChanges(true);
     }}
-    rows={2}
+    rows={4}
     placeholder="備考を入力"
     style={{
       width: '90%',
@@ -2687,7 +2691,7 @@ const changeDate = (delta) => {
       border: '2px solid #FFD54F',
       borderRadius: '4px',
       fontSize: '0.8rem',
-      resize: 'none',
+      resize: 'vertical',
       backgroundColor: 'white'
     }}
   />
