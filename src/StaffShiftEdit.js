@@ -861,7 +861,7 @@ if (!isAuthenticated) {
           transition: 'all 0.2s'
         }}
       >
-        シフト作成
+        終日フリー
       </button>
       <button
         onClick={() => setBulkIsFree('change')}
@@ -878,7 +878,7 @@ if (!isAuthenticated) {
           transition: 'all 0.2s'
         }}
       >
-        変更
+        終日不可
       </button>
       <button
         onClick={() => setBulkIsFree('time')}
