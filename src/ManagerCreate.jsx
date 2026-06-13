@@ -1396,7 +1396,7 @@ role: shift.role || shiftSettings.defaultRole,
         isEditingStore: false,
         isEditingRole: false,
         remarks: shift.remarks || '',
-        manager_memo: shift.manager_memo || ''
+        manager_memo: finalMap[String(shift.manager_number)]?.manager_memo || ''
       };
     });
   setEditRows(rows);
