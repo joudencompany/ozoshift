@@ -1034,10 +1034,8 @@ function ManagerAttendance({ onBack }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [downloadMonth, setDownloadMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  });
+  const [downloadMonth, setDownloadMonth] = useState('');
+  const [availableDownloadMonths, setAvailableDownloadMonths] = useState([]);
   const [currentHelpPage, setCurrentHelpPage] = useState('calendar');
   // ✅ ここに追加
   
@@ -1170,6 +1168,33 @@ const [lastConfirmedAt, setLastConfirmedAt] = useState(null); // 最後の確定
 const [modificationComment, setModificationComment] = useState(''); // 勤怠修正へのコメント
 const [selectedExpense, setSelectedExpense] = useState(null); // 選択中の申請
 const [expenseComment, setExpenseComment] = useState(''); // コメント入力
+const fetchDownloadMonths = async () => {
+  try {
+    const { data: confirmed } = await supabase
+      .from('attendance')
+      .select('date')
+      .eq('is_confirmed', true);
+
+    const { data: unconfirmed } = await supabase
+      .from('attendance')
+      .select('date')
+      .eq('is_confirmed', false);
+
+    const confirmedMonths = new Set((confirmed || []).map(r => r.date.substring(0, 7)));
+    const unconfirmedMonths = new Set((unconfirmed || []).map(r => r.date.substring(0, 7)));
+
+    const months = [...confirmedMonths]
+      .filter(m => !unconfirmedMonths.has(m))
+      .sort()
+      .reverse();
+
+    setAvailableDownloadMonths(months);
+    setDownloadMonth(months[0] || '');
+  } catch (err) {
+    console.error('月取得エラー:', err);
+  }
+};
+
 const handleCsvDownload = async () => {
   try {
     const [year, month] = downloadMonth.split('-');
@@ -1690,21 +1715,34 @@ const changeDate = (delta) => {
         {showDownloadModal && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', maxWidth: '340px', width: '90%', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-              <h3 style={{ margin: '0 0 1rem 0', color: '#1976D2' }}>勤怠データ CSVダウンロード</h3>
+              <h3 style={{ margin: '0 0 1rem 0', color: '#1976D2' }}>勤怠データ ダウンロード</h3>
               <div style={{ backgroundColor: '#FFF3E0', border: '1px solid #FF9800', borderRadius: '6px', padding: '0.75rem', marginBottom: '1rem', fontSize: '0.85rem', color: '#E65100', fontWeight: 'bold' }}>
                 毎月必ずダウンロードしてください
               </div>
               <div style={{ marginBottom: '1.25rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>対象月を選択</label>
-                <input
-                  type="month"
-                  value={downloadMonth}
-                  onChange={(e) => setDownloadMonth(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px', fontSize: '1rem', boxSizing: 'border-box' }}
-                />
+                {availableDownloadMonths.length === 0 ? (
+                  <div style={{ padding: '0.75rem', backgroundColor: '#F5F5F5', borderRadius: '4px', color: '#999', fontSize: '0.9rem', textAlign: 'center' }}>
+                    全て確定済みの月がありません
+                  </div>
+                ) : (
+                  <select
+                    value={downloadMonth}
+                    onChange={(e) => setDownloadMonth(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px', fontSize: '1rem', boxSizing: 'border-box' }}
+                  >
+                    {availableDownloadMonths.map(m => (
+                      <option key={m} value={m}>{m.replace('-', '年')}月</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={handleCsvDownload} style={{ flex: 1, padding: '0.75rem', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem' }}>
+                <button
+                  onClick={handleCsvDownload}
+                  disabled={!downloadMonth}
+                  style={{ flex: 1, padding: '0.75rem', backgroundColor: downloadMonth ? '#4CAF50' : '#ccc', color: 'white', border: 'none', borderRadius: '4px', cursor: downloadMonth ? 'pointer' : 'not-allowed', fontWeight: 'bold', fontSize: '0.95rem' }}
+                >
                   ダウンロード
                 </button>
                 <button onClick={() => setShowDownloadModal(false)} style={{ flex: 1, padding: '0.75rem', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.95rem' }}>
@@ -1718,7 +1756,7 @@ const changeDate = (delta) => {
           <h2>勤怠管理</h2>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button
-            onClick={() => setShowDownloadModal(true)}
+            onClick={() => { fetchDownloadMonths(); setShowDownloadModal(true); }}
             style={{
               padding: '0.5rem 0.3rem',
               backgroundColor: '#4CAF50',
@@ -1728,10 +1766,10 @@ const changeDate = (delta) => {
               cursor: 'pointer',
               fontSize: '0.85rem',
               whiteSpace: 'nowrap',
-              width: '80px'
+              width: '90px'
             }}
           >
-            CSV
+            ダウンロード
           </button>
  <button
   onClick={() => setShowNotifications(!showNotifications)}
