@@ -2765,7 +2765,7 @@ const changeDate = (delta) => {
             </td>
             {/* 勤怠入力開始 */}
             <td style={{ padding: '0.5rem', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#FFEBEE' }}>
-              {record.actual_start || '-'}
+              {record.actual_start ? record.actual_start.substring(0, 5) : '-'}
             </td>
             {/* シフト予定終了 */}
            <td style={{ padding: '0.5rem', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#E3F2FD' }}>
@@ -2773,7 +2773,7 @@ const changeDate = (delta) => {
             </td>
             {/* 勤怠入力終了 */}
             <td style={{ padding: '0.5rem', borderBottom: '1px dotted #ddd', textAlign: 'center', backgroundColor: record.actual_end ? '#FFEBEE' : 'transparent' }}>
-              {record.actual_end || '-'}
+              {record.actual_end ? record.actual_end.substring(0, 5) : '-'}
             </td>
            <td style={{ padding: '0.75rem', border: '1px solid #ddd' }}>
   {record.break_periods && record.break_periods.length > 0 ? (
