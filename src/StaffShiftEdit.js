@@ -483,15 +483,18 @@ const [submissionCounts, setSubmissionCounts] = useState({});
   const fetchRecruitmentAndSubmissions = async (dates) => {
     try {
       // App.jsと同じロジック：recruitment_settings + 提出数 + final_shifts boshu行数
-      const [settingsResult, shiftsResult, boshuResult] = await Promise.all([
+      const [settingsResult, shiftsResult, boshuResult, usersResult] = await Promise.all([
         supabase.from('settings').select('value').eq('key', 'recruitment_settings').single(),
         supabase.from('shifts').select('date, manager_number').in('date', dates),
-        supabase.from('final_shifts').select('date').eq('is_boshu', true).in('date', dates)
+        supabase.from('final_shifts').select('date').eq('is_boshu', true).in('date', dates),
+        supabase.from('users').select('manager_number').eq('is_deleted', false)
       ]);
 
-      // 提出人数をカウント（日付ごとに distinct manager_number）
+      // 提出人数をカウント（アクティブユーザーのみ・日付ごとに distinct manager_number）
+      const activeUsers = new Set(usersResult.data?.map(u => u.manager_number) || []);
       const countMap = {};
       shiftsResult.data?.forEach(s => {
+        if (!activeUsers.has(s.manager_number)) return;
         if (!countMap[s.date]) countMap[s.date] = new Set();
         countMap[s.date].add(s.manager_number);
       });

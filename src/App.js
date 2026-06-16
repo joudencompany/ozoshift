@@ -1036,14 +1036,17 @@ while (d <= new Date(endDate)) {
   // 募集設定と提出人数を取得
   const dateStrings = dates.map(d => d.date);
   try {
-    const [settingsResult, shiftsResult] = await Promise.all([
+    const [settingsResult, shiftsResult, usersResult] = await Promise.all([
       supabase.from('settings').select('value').eq('key', 'recruitment_settings').single(),
-      supabase.from('shifts').select('date, manager_number').in('date', dateStrings)
+      supabase.from('shifts').select('date, manager_number').in('date', dateStrings),
+      supabase.from('users').select('manager_number').eq('is_deleted', false)
     ]);
 
-    // 提出人数（日付ごとのdistinct manager_number数）
+    // 提出人数（アクティブユーザーのみ・日付ごとのdistinct manager_number数）
+    const activeUsers = new Set(usersResult.data?.map(u => u.manager_number) || []);
     const countMap = {};
     shiftsResult.data?.forEach(s => {
+      if (!activeUsers.has(s.manager_number)) return;
       if (!countMap[s.date]) countMap[s.date] = new Set();
       countMap[s.date].add(s.manager_number);
     });
