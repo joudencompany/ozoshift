@@ -122,7 +122,7 @@ const getHelpContent = (page) => {
         <ol style={{ lineHeight: '1.8' }}>
           <li><strong>設定ボタン（⚙️）</strong>をクリックして、店舗と役割をカスタマイズ（初回のみ推奨）</li>
           <li><strong>開始日と終了日を選択</strong>してシフト期間を指定</li>
-          <li><strong>次へ</strong>をクリックしてシフト表を表示</li>
+          <li><strong>次へ</strong>をクリックしてシフト希望一覧を表示</li>
           <li><strong>作成</strong>ボタンでシフト編集画面に移動</li>
         </ol>
         
@@ -1586,6 +1586,7 @@ const handleStoreSelect = (index, value) => {
 
   const finishShiftCreation = async (sendNotif) => {
     setShowNotifyModal(false);
+    setIsSavingShift(true);
     try {
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ managerNumber: MANAGER_NUMBER, start: startDate, end: endDate }) });
     } catch {}
@@ -1598,9 +1599,8 @@ const handleStoreSelect = (index, value) => {
       } catch (e) { console.error('通知エラー:', e); }
     }
     clearDraft();
-    alert(sendNotif ? '保存・通知しました' : '保存しました');
-    setIsEditing(false);
-    fetchShiftData();
+    setIsSavingShift(false);
+    onBack();
   };
 
 
@@ -2357,7 +2357,7 @@ const inRequest = isFreeDay ? true : (slot >= originalStartStr && slot < origina
         setShowHelp(true);
       }} />
       <div className="login-card" style={{ maxWidth: '100%', width: '100%', boxSizing: 'border-box', padding: '1rem' }}>
-        <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.5rem)' }}>シフト表</h2>
+        <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.5rem)' }}>シフト希望一覧</h2>
         <div className="shift-table-wrapper" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100vh - 200px)', WebkitOverflowScrolling: 'touch' }}>
           <table className="shift-table">
             <thead>
