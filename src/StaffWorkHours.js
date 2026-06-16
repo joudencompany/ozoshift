@@ -263,6 +263,7 @@ function StaffWorkHours({ onBack, loggedInManagerNumber }) {
   const [newSlotName, setNewSlotName] = useState('');
   const [newSlotStart, setNewSlotStart] = useState('00:00');
   const [newSlotEnd, setNewSlotEnd] = useState('00:00');
+  const [expensesData, setExpensesData] = useState([]);
 
   const generateTimeOptions = () => {
     const options = [];
@@ -354,6 +355,19 @@ useEffect(() => {
 
       setWorkData(data);
       setMessage('');
+
+      // 交通費データも取得
+      let expQuery = supabase
+        .from('attendance_expenses')
+        .select('*')
+        .eq('manager_number', mgr_number);
+      if (year && month) {
+        const startDate = `${year}-${month.padStart(2, '0')}-01`;
+        const endDate = new Date(year, month, 0);
+        expQuery = expQuery.gte('action_date', startDate).lte('action_date', endDate.toISOString().split('T')[0]);
+      }
+      const { data: expData } = await expQuery;
+      setExpensesData(expData || []);
 
     } catch (error) {
       console.error('データ取得エラー:', error);
@@ -1078,6 +1092,7 @@ if (!isAuthenticated && loggedInManagerNumber) {
                             {group.data.some(d => d.salary) && (
                               <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #ddd', minWidth: '70px' }}>給料</th>
                             )}
+                            <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #ddd', minWidth: '70px' }}>交通費</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1119,9 +1134,9 @@ if (!isAuthenticated && loggedInManagerNumber) {
                                   {hours}時間{minutes}分
                                 </td>
                                 {group.data.some(d => d.salary) && (
-                                  <td style={{ 
-                                    padding: '0.5rem', 
-                                    textAlign: 'right', 
+                                  <td style={{
+                                    padding: '0.5rem',
+                                    textAlign: 'right',
                                     borderBottom: '1px solid #eee',
                                     fontWeight: 'bold',
                                     color: record.salary ? '#4CAF50' : '#999'
@@ -1129,6 +1144,15 @@ if (!isAuthenticated && loggedInManagerNumber) {
                                     {record.salary ? `¥${record.salary.toLocaleString()}` : '-'}
                                   </td>
                                 )}
+                                {(() => {
+                                  const exp = expensesData.find(e => e.action_date === record.date);
+                                  const fee = (Number(exp?.transport_fee || 0) + Number(exp?.support_transport_fee || 0));
+                                  return (
+                                    <td style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #eee', color: fee > 0 ? '#1976D2' : '#999' }}>
+                                      {fee > 0 ? `¥${fee.toLocaleString()}` : '-'}
+                                    </td>
+                                  );
+                                })()}
                               </tr>
                             );
                           })}

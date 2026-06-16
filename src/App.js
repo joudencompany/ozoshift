@@ -154,6 +154,9 @@ const getHelpContent = (page, managerNumber = '') => {
   login: (
   <div>
     <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>ログイン画面の使い方</h2>
+    <div style={{ marginBottom: '1.5rem' }}>
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='280'%3E%3Crect width='400' height='280' fill='%23f5f5f5'/%3E%3Crect x='30' y='15' width='340' height='250' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='17' font-weight='bold'%3Eログイン画面%3C/text%3E%3Ctext x='50' y='85' font-size='13' fill='%23555'%3E管理番号%3C/text%3E%3Crect x='50' y='93' width='300' height='32' rx='5' fill='white' stroke='%231976D2' stroke-width='1.5'/%3E%3Ctext x='65' y='115' font-size='13' fill='%23333'%3E例：0001%3C/text%3E%3Ctext x='50' y='150' font-size='13' fill='%23555'%3Eパスワード%3C/text%3E%3Crect x='50' y='158' width='270' height='32' rx='5' fill='white' stroke='%231976D2' stroke-width='1.5'/%3E%3Ctext x='65' y='180' font-size='14' fill='%23333'%3E••••••%3C/text%3E%3Crect x='326' y='158' width='24' height='32' rx='5' fill='white' stroke='%23ddd'/%3E%3Ctext x='338' y='180' text-anchor='middle' font-size='13' fill='%23888'%3E👁%3C/text%3E%3Crect x='110' y='208' width='180' height='36' rx='8' fill='%231565C0'/%3E%3Ctext x='200' y='232' text-anchor='middle' font-size='15' fill='white' font-weight='bold'%3Eログイン%3C/text%3E%3Ctext x='200' y='267' text-anchor='middle' font-size='12' fill='%231976D2'%3Eパスワード変更%3C/text%3E%3C/svg%3E" alt="ログイン画面" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+    </div>
     <ol style={{ lineHeight: '1.8' }}>
       <li><strong>管理番号</strong>を入力します</li>
       <li><strong>パスワード</strong>を入力します</li>
@@ -173,6 +176,9 @@ const getHelpContent = (page, managerNumber = '') => {
      clockin: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>勤怠入力の使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='320'%3E%3Crect width='400' height='320' fill='%23f5f5f5'/%3E%3Crect x='20' y='15' width='360' height='290' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='16' font-weight='bold'%3E勤怠入力画面%3C/text%3E%3Crect x='35' y='60' width='155' height='100' rx='10' fill='%234CAF50'/%3E%3Ctext x='112' y='112' text-anchor='middle' font-size='30'%3E🟢%3C/text%3E%3Ctext x='112' y='143' text-anchor='middle' font-size='15' fill='white' font-weight='bold'%3E出勤%3C/text%3E%3Crect x='210' y='60' width='155' height='100' rx='10' fill='%232196F3'/%3E%3Ctext x='287' y='112' text-anchor='middle' font-size='30'%3E🔵%3C/text%3E%3Ctext x='287' y='143' text-anchor='middle' font-size='15' fill='white' font-weight='bold'%3E退勤%3C/text%3E%3Crect x='35' y='175' width='155' height='100' rx='10' fill='%23FF9800'/%3E%3Ctext x='112' y='227' text-anchor='middle' font-size='30'%3E🟠%3C/text%3E%3Ctext x='112' y='258' text-anchor='middle' font-size='15' fill='white' font-weight='bold'%3E休憩開始%3C/text%3E%3Crect x='210' y='175' width='155' height='100' rx='10' fill='%239C27B0'/%3E%3Ctext x='287' y='227' text-anchor='middle' font-size='30'%3E🟣%3C/text%3E%3Ctext x='287' y='258' text-anchor='middle' font-size='15' fill='white' font-weight='bold'%3E休憩終了%3C/text%3E%3Ctext x='200' y='300' text-anchor='middle' font-size='11' fill='%23666'%3Eダブルクリック（2回タップ）で記録%3C/text%3E%3C/svg%3E" alt="勤怠入力画面" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <ol style={{ lineHeight: '1.8' }}>
           <li><strong>パスワード認証</strong>を行います（パスワードは管理者に確認してください）</li>
           <li><strong>管理番号</strong>を入力して「次へ」ボタンをクリックします</li>
@@ -201,6 +207,9 @@ const getHelpContent = (page, managerNumber = '') => {
    roleSelect: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>役職選択画面の使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='280'%3E%3Crect width='400' height='280' fill='%23f5f5f5'/%3E%3Crect x='30' y='15' width='340' height='250' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='17' font-weight='bold'%3E役職選択%3C/text%3E%3Crect x='60' y='62' width='280' height='50' rx='8' fill='%231976D2'/%3E%3Ctext x='200' y='94' text-anchor='middle' font-size='16' fill='white' font-weight='bold'%3E👤 スタッフ%3C/text%3E%3Crect x='60' y='128' width='280' height='50' rx='8' fill='%23E65100'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='16' fill='white' font-weight='bold'%3E🏪 オーナー%3C/text%3E%3Crect x='60' y='194' width='280' height='50' rx='8' fill='%2343A047'/%3E%3Ctext x='200' y='226' text-anchor='middle' font-size='16' fill='white' font-weight='bold'%3E🕐 勤怠入力%3C/text%3E%3C/svg%3E" alt="役職選択画面" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <div style={{ marginBottom: '1.5rem', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>👤 あなたの役職に合ったボタンを選択してください。</p>
         </div>
@@ -231,6 +240,9 @@ const getHelpContent = (page, managerNumber = '') => {
     staffMenu: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>スタッフメニューの使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f5f5f5'/%3E%3Crect x='20' y='15' width='360' height='270' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='16' font-weight='bold'%3Eスタッフメニュー%3C/text%3E%3Crect x='40' y='60' width='320' height='42' rx='8' fill='%231976D2'/%3E%3Ctext x='200' y='87' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E📅 シフト関連%3C/text%3E%3Crect x='60' y='117' width='280' height='30' rx='6' fill='%23E3F2FD' stroke='%231976D2'/%3E%3Ctext x='80' y='137' font-size='11' fill='%231976D2'%3E▸ シフト提出 ／ シフト変更 ／ シフト確認%3C/text%3E%3Crect x='40' y='163' width='320' height='42' rx='8' fill='%23607D8B'/%3E%3Ctext x='200' y='190' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E⏱ 就労時間確認%3C/text%3E%3Crect x='40' y='221' width='320' height='42' rx='8' fill='%239E9E9E'/%3E%3Ctext x='200' y='248' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E📧 お問い合わせ%3C/text%3E%3C/svg%3E" alt="スタッフメニュー" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <div style={{ marginBottom: '1.5rem', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>📋 シフトの提出・確認・変更や、就労時間の確認ができます。</p>
         </div>
@@ -244,7 +256,7 @@ const getHelpContent = (page, managerNumber = '') => {
               <li><strong>シフト確認</strong>：オーナーが作成した確定シフトを確認します</li>
             </ul>
           </li>
-          <li><strong>就労時間確認</strong>：自分の勤務時間の実績を確認します</li>
+          <li><strong>就労時間確認</strong>：自分の勤務時間・交通費の実績を確認します</li>
           <li><strong>お問い合わせ</strong>：問題や質問をフォームで送ることができます</li>
         </ul>
 
@@ -262,6 +274,9 @@ const getHelpContent = (page, managerNumber = '') => {
     shiftPeriod: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>新規提出 - 期間選択の使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='320'%3E%3Crect width='400' height='320' fill='%23f5f5f5'/%3E%3Crect x='30' y='15' width='340' height='290' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='17' font-weight='bold'%3Eシフト提出 - 期間選択%3C/text%3E%3Crect x='60' y='65' width='280' height='28' rx='5' fill='%23E3F2FD' stroke='%231976D2'/%3E%3Ctext x='70' y='84' font-size='13' fill='%23333'%3E📅 開始日：2025-01-01%3C/text%3E%3Crect x='60' y='105' width='280' height='28' rx='5' fill='%23E3F2FD' stroke='%231976D2'/%3E%3Ctext x='70' y='124' font-size='13' fill='%23333'%3E📅 終了日：2025-01-31%3C/text%3E%3Crect x='200' y='148' width='120' height='28' rx='6' fill='%231976D2'/%3E%3Ctext x='260' y='167' text-anchor='middle' font-size='14' fill='white'%3E候補から選ぶ%3C/text%3E%3Crect x='70' y='148' width='120' height='28' rx='6' fill='%234CAF50'/%3E%3Ctext x='130' y='167' text-anchor='middle' font-size='14' fill='white'%3E次へ →%3C/text%3E%3Crect x='50' y='195' width='300' height='80' rx='8' fill='%23FFF8E1' stroke='%23FFB300'/%3E%3Ctext x='60' y='215' font-size='12' fill='%23856404' font-weight='bold'%3E💡 ポイント%3C/text%3E%3Ctext x='60' y='233' font-size='11' fill='%23856404'%3E・「候補から選ぶ」でオーナー設定の期間を使用%3C/text%3E%3Ctext x='60' y='249' font-size='11' fill='%23856404'%3E・または開始日・終了日を自分で選択%3C/text%3E%3Ctext x='60' y='265' font-size='11' fill='%23856404'%3E・シフトが作成済みの日は含められません%3C/text%3E%3C/svg%3E" alt="期間選択画面" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <div style={{ marginBottom: '1.5rem', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>📅 シフトを提出したい期間の開始日と終了日を選びます。</p>
         </div>
@@ -288,6 +303,9 @@ const getHelpContent = (page, managerNumber = '') => {
 managerAuth: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>オーナーパスワード画面の使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Crect width='400' height='240' fill='%23f5f5f5'/%3E%3Crect x='30' y='15' width='340' height='210' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='50' text-anchor='middle' font-size='17' font-weight='bold'%3E🔐 オーナー認証%3C/text%3E%3Ctext x='60' y='93' font-size='13' fill='%23555'%3Eパスワードを入力してください%3C/text%3E%3Crect x='60' y='101' width='280' height='36' rx='6' fill='white' stroke='%231976D2' stroke-width='1.5'/%3E%3Ctext x='75' y='125' font-size='15' fill='%23333'%3E••••••%3C/text%3E%3Crect x='130' y='155' width='140' height='38' rx='8' fill='%231565C0'/%3E%3Ctext x='200' y='180' text-anchor='middle' font-size='16' fill='white' font-weight='bold'%3E認証%3C/text%3E%3C/svg%3E" alt="オーナー認証画面" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <div style={{ marginBottom: '1.5rem', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>🔐 オーナーメニューに入るためのパスワード認証画面です。</p>
         </div>
@@ -313,6 +331,9 @@ managerAuth: (
     managerMenu: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>オーナーメニューの使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='320'%3E%3Crect width='400' height='320' fill='%23f5f5f5'/%3E%3Crect x='20' y='15' width='360' height='290' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='16' font-weight='bold'%3E🏪 オーナーメニュー%3C/text%3E%3Crect x='40' y='60' width='320' height='42' rx='8' fill='%231976D2'/%3E%3Ctext x='200' y='87' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E📅 シフト関連%3C/text%3E%3Crect x='40' y='115' width='320' height='42' rx='8' fill='%23607D8B'/%3E%3Ctext x='200' y='142' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E🕒 勤怠管理%3C/text%3E%3Crect x='40' y='170' width='320' height='42' rx='8' fill='%2343A047'/%3E%3Ctext x='200' y='197' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E👤 新人登録%3C/text%3E%3Crect x='40' y='225' width='320' height='42' rx='8' fill='%239E9E9E'/%3E%3Ctext x='200' y='252' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E📧 お問い合わせ%3C/text%3E%3Crect x='40' y='280' width='320' height='22' rx='6' fill='%23FFF8E1' stroke='%23FFB300'/%3E%3Ctext x='200' y='296' text-anchor='middle' font-size='11' fill='%23856404'%3E💡 各ボタンをタップして機能を使用します%3C/text%3E%3C/svg%3E" alt="オーナーメニュー" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <div style={{ marginBottom: '1.5rem', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>🏪 シフト管理・勤怠管理・スタッフ登録などが行えます。</p>
         </div>
@@ -346,6 +367,9 @@ managerAuth: (
     shiftInput: (
       <div>
         <h2 style={{ color: '#1976D2', marginBottom: '1rem' }}>シフト入力画面の使い方</h2>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='420'%3E%3Crect width='400' height='420' fill='%23f5f5f5'/%3E%3Crect x='20' y='15' width='360' height='390' rx='10' fill='white' stroke='%231976D2' stroke-width='2'/%3E%3Ctext x='200' y='45' text-anchor='middle' font-size='16' font-weight='bold'%3Eシフト入力画面%3C/text%3E%3Crect x='35' y='60' width='330' height='60' rx='6' fill='%23E3F2FD' stroke='%231976D2'/%3E%3Ctext x='50' y='80' font-size='12' font-weight='bold' fill='%231976D2'%3E一括設定%3C/text%3E%3Crect x='45' y='88' width='55' height='22' rx='4' fill='%23607D8B'/%3E%3Ctext x='72' y='104' text-anchor='middle' font-size='11' fill='white'%3E全て%3C/text%3E%3Crect x='105' y='88' width='40' height='22' rx='4' fill='%231976D2'/%3E%3Ctext x='125' y='104' text-anchor='middle' font-size='11' fill='white'%3E月%3C/text%3E%3Crect x='150' y='88' width='40' height='22' rx='4' fill='%231976D2'/%3E%3Ctext x='170' y='104' text-anchor='middle' font-size='11' fill='white'%3E火%3C/text%3E%3Crect x='195' y='88' width='40' height='22' rx='4' fill='%23607D8B'/%3E%3Ctext x='215' y='104' text-anchor='middle' font-size='11' fill='white'%3E水%3C/text%3E%3Crect x='35' y='135' width='330' height='90' rx='6' fill='%23f9f9f9' stroke='%23ddd'/%3E%3Ctext x='45' y='155' font-size='12' font-weight='bold'%3E2025-01-15（水）%3C/text%3E%3Crect x='45' y='163' width='70' height='22' rx='4' fill='%234CAF50'/%3E%3Ctext x='80' y='179' text-anchor='middle' font-size='10' fill='white'%3E終日フリー%3C/text%3E%3Crect x='120' y='163' width='70' height='22' rx='4' fill='%23f44336'/%3E%3Ctext x='155' y='179' text-anchor='middle' font-size='10' fill='white'%3E終日不可%3C/text%3E%3Crect x='195' y='163' width='70' height='22' rx='4' fill='%23FF9800'/%3E%3Ctext x='230' y='179' text-anchor='middle' font-size='10' fill='white'%3E時間指定%3C/text%3E%3Ctext x='45' y='207' font-size='11' fill='%23666'%3E開始: 09:00　終了: 17:00%3C/text%3E%3Crect x='35' y='240' width='330' height='60' rx='6' fill='%23f9f9f9' stroke='%23ddd'/%3E%3Ctext x='45' y='260' font-size='12' font-weight='bold'%3E2025-01-16（木）%3C/text%3E%3Crect x='45' y='268' width='70' height='22' rx='4' fill='%23f44336'/%3E%3Ctext x='80' y='284' text-anchor='middle' font-size='10' fill='white'%3E終日不可%3C/text%3E%3Crect x='100' y='315' width='200' height='30' rx='6' fill='%231565C0'/%3E%3Ctext x='200' y='335' text-anchor='middle' font-size='14' fill='white' font-weight='bold'%3E送信%3C/text%3E%3Crect x='35' y='358' width='330' height='35' rx='6' fill='%23FFF8E1' stroke='%23FFB300'/%3E%3Ctext x='45' y='373' font-size='11' fill='%23856404'%3E👥 1/3人　希望提出/募集%3C/text%3E%3Ctext x='45' y='386' font-size='10' fill='%23856404'%3E提出人数/募集人数が表示されます%3C/text%3E%3C/svg%3E" alt="シフト入力画面" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+        </div>
         <div style={{ marginBottom: '1.5rem', backgroundColor: '#f5f5f5', padding: '1rem', borderRadius: '8px' }}>
           <p style={{ fontSize: '14px', margin: 0 }}>📝 各日付ごとに勤務希望時間を入力します。</p>
         </div>
@@ -368,6 +392,7 @@ managerAuth: (
         <div style={{ backgroundColor: '#fff3cd', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>
           <strong>💡 ポイント：</strong>
           <ul style={{ marginTop: '0.5rem', paddingLeft: '1.2rem', marginBottom: 0 }}>
+            <li>各日付に「👥 N/M人 希望提出/募集」と表示されます。N=現在の提出数、M=募集人数です</li>
             <li>備考欄に「遅刻予定」「早退希望」などのメモを残せます</li>
             <li>全ての日付を入力したら「送信」ボタンで提出してください</li>
             <li>オーナーがすでにシフトを組んだ日付が含まれる場合は送信できません</li>
@@ -653,18 +678,17 @@ const [completionMsg, setCompletionMsg] = useState('');
       setShowNotifModal(true);
       return;
     }
-    const neverSet = localStorage.getItem('notifEnabled') === null;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone;
     const hasPushManager = 'serviceWorker' in navigator && 'PushManager' in window;
-    // PWAモード: ブラウザ権限がgrantedでもdeniedでもなければ（= default）プロンプトを表示
-    // これにより「後で」を押した人も次回PWA起動時に再表示される
     const standaloneNotGranted = isStandalone
       && hasPushManager
       && 'Notification' in window
       && Notification.permission !== 'granted'
       && Notification.permission !== 'denied';
-    if (neverSet || standaloneNotGranted) {
+    // 通知が有効でない場合は毎回プロンプトを表示
+    const notifNotEnabled = localStorage.getItem('notifEnabled') !== 'true';
+    if (notifNotEnabled || standaloneNotGranted) {
       setShowNotifPrompt(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -679,15 +703,11 @@ const [completionMsg, setCompletionMsg] = useState('');
         || window.navigator.standalone;
       if (isStandalone) return;
     } catch (e) {}
-    // 初回ログイン（notifEnabled未設定）はdismissedAtを無視して必ず表示
-    const isFirstTime = localStorage.getItem('notifEnabled') === null;
-    // Android初回はHomeScreenPromptModalで案内するのでここでは表示しない
+    // ホーム画面未追加の場合は毎回バナーを表示
     const isAndroid = /Android/i.test(navigator.userAgent);
+    // Android初回はHomeScreenPromptModalで案内するのでここでは表示しない
+    const isFirstTime = localStorage.getItem('notifEnabled') === null;
     if (isFirstTime && isAndroid) return;
-    if (!isFirstTime) {
-      const dismissedAt = localStorage.getItem('installBannerDismissedAt');
-      if (dismissedAt && Date.now() - parseInt(dismissedAt) < 7 * 24 * 60 * 60 * 1000) return;
-    }
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(ios);
     setShowInstallBanner(true);
@@ -1401,12 +1421,10 @@ const handleSubmit = async () => {
             maybeShowHomeScreenPrompt();
           }}
             style={{ width: '100%', padding: '14px', backgroundColor: '#1565C0', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px' }}>
-            はい、受け取る
+            はい
           </button>
           <button type="button" onClick={() => {
             setShowNotifPrompt(false);
-            setNotifEnabled(false);
-            localStorage.setItem('notifEnabled', 'false');
             maybeShowHomeScreenPrompt();
           }}
             style={{ width: '100%', padding: '11px', backgroundColor: '#f5f5f5', color: '#777', border: 'none', borderRadius: '14px', fontSize: '14px', cursor: 'pointer' }}>

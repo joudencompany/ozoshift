@@ -1053,7 +1053,7 @@ if (!isAuthenticated) {
               color: isFull ? '#2e7d32' : '#e65100',
               whiteSpace: 'nowrap'
             }}>
-              👥 {submitted}/{required}人
+              👥 {submitted}/{required}人 希望提出/募集
             </span>
           );
         })()}
