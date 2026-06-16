@@ -1473,7 +1473,7 @@ const handleSubmit = async () => {
           <div style={{ fontSize: '3rem', marginBottom: '0.3rem' }}>📲</div>
           <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: '#1565C0' }}>ホーム画面に追加しますか？</h3>
           <p style={{ color: '#555', fontSize: '13px', lineHeight: 1.7, margin: '0 0 1.2rem' }}>
-            プッシュ通知が届くようになります。<br />アイコンからいつでも起動できます。
+            追加すると、プッシュ通知が届くようになります。<br />アイコンからいつでも起動できます。
           </p>
           <button type="button" onClick={isChromeMobile ? doInstall : goToChrome}
             style={{ width: '100%', padding: '14px', backgroundColor: '#34A853', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px', boxShadow: '0 4px 12px rgba(52,168,83,0.4)' }}>
@@ -2111,11 +2111,11 @@ if (role === 'clockin') {
           </div>
         )}
         <div style={{ backgroundColor: '#E3F2FD', border: '1px solid #90CAF9', borderRadius: '10px', padding: '10px', marginBottom: '1rem', fontSize: '12px', color: '#1565C0', lineHeight: 1.6 }}>
-          これらの設定をしないとアプリを開いたときだけ通知が届きます
+          これらの設定をしないと、アプリを開いたときだけ通知が届きます。
         </div>
         <button onClick={() => { localStorage.setItem('batteryGuideShown', '1'); setShowBatteryGuide(false); }}
           style={{ width: '100%', padding: '12px', backgroundColor: '#607D8B', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}>
-          戻る
+          閉じる
         </button>
       </div>
     </div>
@@ -2145,7 +2145,7 @@ if (role === 'clockin') {
           <div style={{ fontWeight: 'bold', color: '#E65100', marginTop: '4px' }}>アプリを1日1回は確認してください。</div>
         </div>
         <div style={{ backgroundColor: '#E3F2FD', border: '1px solid #90CAF9', borderRadius: '10px', padding: '10px', marginBottom: '1rem', fontSize: '12px', color: '#1565C0', lineHeight: 1.6 }}>
-          改善するには「⚙️ 通知が届かない」ボタンの手順を実施してください
+          改善するには「⚙️ 通知が届かない」ボタンの手順を実施してください。
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => { localStorage.setItem('androidNotifWarnShown', '1'); setShowAndroidWarn(false); }}
