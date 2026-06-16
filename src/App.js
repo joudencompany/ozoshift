@@ -441,6 +441,7 @@ const [managerShiftSub, setManagerShiftSub] = useState(false);
 const [showHelpNotifModal, setShowHelpNotifModal] = useState(false);
 const [notifEnabled, setNotifEnabled] = useState(() => localStorage.getItem('notifEnabled') === 'true');
 const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+const fromLine = new URLSearchParams(window.location.search).get('fromLine') === '1';
 const [showPushDebug, setShowPushDebug] = useState(false);
 const [showBatteryGuide, setShowBatteryGuide] = useState(false);
 const [showAndroidWarn, setShowAndroidWarn] = useState(false);
@@ -454,10 +455,16 @@ const [isSaving, setIsSaving] = useState(false);
 const [completionMsg, setCompletionMsg] = useState('');
   const fetchNotifHistory = async (managerNum) => {
     try {
+      const twoMonthsAgo = new Date();
+      twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+      const twoMonthsAgoStr = twoMonthsAgo.toISOString();
+      // 2ヶ月より古い通知をDBから自動削除
+      await supabase.from('notifications').delete().lt('created_at', twoMonthsAgoStr);
       const { data } = await supabase
         .from('notifications')
         .select('title, body, created_at, target_manager_number')
         .or(`target_manager_number.is.null,target_manager_number.eq.${managerNum}`)
+        .gte('created_at', twoMonthsAgoStr)
         .order('created_at', { ascending: false })
         .limit(50);
       if (data) {
@@ -510,7 +517,8 @@ const [completionMsg, setCompletionMsg] = useState('');
       const { data: periods, error } = await supabase
         .from('shift_periods')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5);
 
       if (error) throw new Error(error.message);
       if (!periods || periods.length === 0) {
@@ -639,6 +647,12 @@ const [completionMsg, setCompletionMsg] = useState('');
   // スタッフログイン後：通知未設定 or PWAで未許可の場合にプロンプトを表示
   useEffect(() => {
     if (!isLoggedIn || role !== 'staff') return;
+    if (fromLine) {
+      localStorage.setItem('notifEnabled', 'true');
+      setNotifEnabled(true);
+      setShowNotifModal(true);
+      return;
+    }
     const neverSet = localStorage.getItem('notifEnabled') === null;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone;
@@ -659,6 +673,7 @@ const [completionMsg, setCompletionMsg] = useState('');
   // ログイン後にホーム画面追加バナーを表示
   useEffect(() => {
     if (!isLoggedIn) return;
+    if (localStorage.getItem('pwaInstalled') === 'true') return;
     try {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone;
@@ -703,12 +718,14 @@ const [completionMsg, setCompletionMsg] = useState('');
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         // registerPushSilent 内でDB照合を行い、エンドポイントが一致する場合は再登録しない
         registerPushSilent(loggedInManagerNumber);
-        // バッテリー最適化で見逃した通知をSWに取得・表示させる（キャッチアップ）
-        navigator.serviceWorker.ready.then(reg => {
-          if (reg.active) {
-            reg.active.postMessage({ type: 'CATCHUP', managerNumber: String(loggedInManagerNumber) });
-          }
-        }).catch(() => {});
+        // バッテリー最適化で見逃した通知をSWに取得・表示させる（初回登録直後はスキップ）
+        if (localStorage.getItem('pushRegisteredAt')) {
+          navigator.serviceWorker.ready.then(reg => {
+            if (reg.active) {
+              reg.active.postMessage({ type: 'CATCHUP', managerNumber: String(loggedInManagerNumber) });
+            }
+          }).catch(() => {});
+        }
       }
     }
 
@@ -819,6 +836,7 @@ const [completionMsg, setCompletionMsg] = useState('');
         showNotifToast('❌ DB保存エラー: ' + dbErr.message);
         return false;
       }
+      localStorage.setItem('pushRegisteredAt', new Date().toISOString());
       saveManagerNumToIDB(managerNum);
       showNotifToast('✅ プッシュ通知の登録が完了しました');
       return true;
@@ -1317,42 +1335,87 @@ const handleSubmit = async () => {
   };
   const maybeShowHomeScreenPrompt = () => showInstallFlow();
 
-  const NotifPromptModal = () => (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 6000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-      <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '1.8rem 1.6rem', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
-        <div style={{ fontSize: '2.8rem', marginBottom: '0.4rem' }}>🔔</div>
-        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: '#1565C0' }}>シフト通知を受け取りますか？</h3>
-        <p style={{ color: '#555', fontSize: '13px', lineHeight: 1.7, margin: '0 0 1.2rem' }}>
-          シフトの締め切りやお知らせを<br />プッシュ通知でお届けします。
-        </p>
-        <button type="button" onClick={async () => {
-          setNotifEnabled(true);
-          localStorage.setItem('notifEnabled', 'true');
-          const ok = await registerPushSilent(loggedInManagerNumber);
-          if (ok) {
+  const NotifPromptModal = () => {
+    const ua = navigator.userAgent;
+    const isLineBrowser = /Line\//i.test(ua) && (/Android/i.test(ua) || /iphone|ipad|ipod/i.test(ua));
+    const isAndroidUA = /Android/i.test(ua);
+
+    React.useEffect(() => {
+      if (isLineBrowser && !isAndroidUA) {
+        const url = new URL(window.location.href);
+        if (!url.searchParams.get('fromLine')) {
+          url.searchParams.set('fromLine', '1');
+          window.history.replaceState(null, '', url.toString());
+        }
+      }
+    }, []);
+
+    if (isLineBrowser) {
+      const openInChrome = () => {
+        const url = window.location.origin + window.location.pathname + '?fromLine=1';
+        window.location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end;';
+      };
+      return (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 6000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '1.8rem 1.6rem', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
+            <div style={{ fontSize: '2.8rem', marginBottom: '0.4rem' }}>🔔</div>
+            <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: '#1565C0' }}>通知を設定するには</h3>
+            <p style={{ color: '#555', fontSize: '13px', lineHeight: 1.7, margin: '0 0 1.2rem' }}>
+              LINEのブラウザでは通知が使えません。<br />
+              {isAndroidUA ? 'Chromeで開いて設定してください。' : '右上の「…」→「ブラウザで開く」でSafariを開いてください。'}
+            </p>
+            {isAndroidUA && (
+              <button type="button" onClick={openInChrome}
+                style={{ width: '100%', padding: '14px', backgroundColor: '#34A853', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px' }}>
+                🌐 Chromeで開く
+              </button>
+            )}
+            <button type="button" onClick={() => { setShowNotifPrompt(false); maybeShowHomeScreenPrompt(); }}
+              style={{ width: '100%', padding: '11px', backgroundColor: '#f5f5f5', color: '#777', border: 'none', borderRadius: '14px', fontSize: '14px', cursor: 'pointer' }}>
+              後で
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 6000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '1.8rem 1.6rem', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
+          <div style={{ fontSize: '2.8rem', marginBottom: '0.4rem' }}>🔔</div>
+          <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: '#1565C0' }}>シフト通知を受け取りますか？</h3>
+          <p style={{ color: '#555', fontSize: '13px', lineHeight: 1.7, margin: '0 0 1.2rem' }}>
+            シフトの締め切りやお知らせを<br />プッシュ通知でお届けします。
+          </p>
+          <button type="button" onClick={async () => {
+            setNotifEnabled(true);
+            localStorage.setItem('notifEnabled', 'true');
+            const ok = await registerPushSilent(loggedInManagerNumber);
             setShowNotifPrompt(false);
-            // Android: バッテリー最適化ガイドを一度だけ表示
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            const shown = localStorage.getItem('batteryGuideShown');
-            if (isAndroid && !shown) setShowBatteryGuide(true);
-          }
-          maybeShowHomeScreenPrompt();
-        }}
-          style={{ width: '100%', padding: '14px', backgroundColor: '#1565C0', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px' }}>
-          はい、受け取る
-        </button>
-        <button type="button" onClick={() => {
-          setShowNotifPrompt(false);
-          setNotifEnabled(false);
-          localStorage.setItem('notifEnabled', 'false');
-          maybeShowHomeScreenPrompt();
-        }}
-          style={{ width: '100%', padding: '11px', backgroundColor: '#f5f5f5', color: '#777', border: 'none', borderRadius: '14px', fontSize: '14px', cursor: 'pointer' }}>
-          後で
-        </button>
+            if (ok) {
+              // Android: バッテリー最適化ガイドを一度だけ表示
+              const isAndroid = /Android/i.test(navigator.userAgent);
+              const shown = localStorage.getItem('batteryGuideShown');
+              if (isAndroid && !shown) setShowBatteryGuide(true);
+            }
+            maybeShowHomeScreenPrompt();
+          }}
+            style={{ width: '100%', padding: '14px', backgroundColor: '#1565C0', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px' }}>
+            はい、受け取る
+          </button>
+          <button type="button" onClick={() => {
+            setShowNotifPrompt(false);
+            setNotifEnabled(false);
+            localStorage.setItem('notifEnabled', 'false');
+            maybeShowHomeScreenPrompt();
+          }}
+            style={{ width: '100%', padding: '11px', backgroundColor: '#f5f5f5', color: '#777', border: 'none', borderRadius: '14px', fontSize: '14px', cursor: 'pointer' }}>
+            後で
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // ========== ホーム画面追加プロンプト（通知プロンプト後・スタッフ初回） ==========
   const HomeScreenPromptModal = () => {
@@ -1369,7 +1432,10 @@ const handleSubmit = async () => {
         const { outcome } = await event.userChoice;
         setInstallPromptEvent(null);
         window.__pwaInstallEvent = null;
-        if (outcome === 'accepted') setDone(true);
+        if (outcome === 'accepted') {
+          localStorage.setItem('pwaInstalled', 'true');
+          setDone(true);
+        }
       } catch(e) {}
     };
 
@@ -1455,6 +1521,7 @@ const handleSubmit = async () => {
         setInstallPromptEvent(null);
         window.__pwaInstallEvent = null;
         if (outcome === 'accepted') {
+          localStorage.setItem('pwaInstalled', 'true');
           setInstallDone(true);
         }
       } catch (err) {
@@ -1494,7 +1561,7 @@ const handleSubmit = async () => {
           <div style={{ fontSize: '3rem', marginBottom: '0.3rem' }}>📲</div>
           <h3 style={{ margin: '0 0 0.4rem', fontSize: '1.2rem', color: '#1565C0' }}>ホーム画面に追加しよう</h3>
           <p style={{ margin: '0 0 1rem', fontSize: '13px', color: '#555', lineHeight: 1.6 }}>
-            プッシュ通知が届くようになります。<br />アイコンからいつでも起動できます。
+            追加すると、プッシュ通知が届くようになります。<br />アイコンからいつでも起動できます。
           </p>
 
           {/* Android Chrome */}
@@ -1688,7 +1755,7 @@ const handleSubmit = async () => {
 
           <button type="button" onClick={dismiss}
             style={{ width: '100%', padding: '11px', backgroundColor: '#eee', color: '#555', border: 'none', borderRadius: '12px', fontSize: '14px', marginTop: '4px' }}>
-            後で
+            わかった
           </button>
         </div>
       </div>
@@ -1958,7 +2025,7 @@ if (role === 'clockin') {
             )}
           </div>
 
-          <button type="button" onClick={() => setShowNotifModal(false)}
+          <button type="button" onClick={() => { setShowNotifModal(false); if (fromLine) maybeShowHomeScreenPrompt(); }}
             style={{ width: '100%', padding: '12px', backgroundColor: '#eee', color: '#555', border: 'none', borderRadius: '12px', fontSize: '15px', marginTop: '1rem' }}>
             閉じる
           </button>
@@ -2418,6 +2485,12 @@ if (role === 'clockin') {
         { period_start: deadlinePeriodStart, period_end: deadlinePeriodEnd, deadline: deadlineDate, is_done: false },
         { onConflict: 'period_start,period_end' }
       );
+      // 直近5件のみ残し古いものを削除
+      const { data: allPeriods } = await supabase.from('shift_periods').select('id').order('created_at', { ascending: false });
+      if (allPeriods && allPeriods.length > 5) {
+        const toDelete = allPeriods.slice(5).map(p => p.id);
+        await supabase.from('shift_periods').delete().in('id', toDelete);
+      }
 
       if (sendNotice) {
         const notifBody = `期間：${deadlinePeriodStart}〜${deadlinePeriodEnd}　期限：${deadlineDate}`;
