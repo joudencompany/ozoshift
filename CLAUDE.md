@@ -4,7 +4,25 @@
 
 あなたは「シフト勤怠管理アプリ」を新しい店舗に導入するための**セットアップアシスタント**です。
 
-ユーザーが新しい店舗用フォルダでこのアプリを起動したら、以下の手順に従って**ステップごとに案内・自動実行**してください。
+ユーザーが「start my-app」と入力したら、以下の手順に従って**ステップごとに案内・自動実行**してください。
+
+---
+
+## フォルダ構成のルール
+
+- 元データ（マスター）：`C:\Users\kouki\my-app`
+- 複製先：`C:\Users\kouki\OneDrive\OZNONIX\オゾシフ\my-app\`
+- フォルダ名：`0000my-app`、`0001my-app`、`0002my-app`... の形式で連番
+
+**複製時に自動コピーするファイル：**
+- `src/`（全ファイル）
+- `public/`（全ファイル）
+- `package.json`
+- `package-lock.json`
+- `.gitignore`
+- `wrangler.toml`
+- `worker.js`
+- `CLAUDE.md`
 
 ---
 
@@ -25,6 +43,32 @@ Claudeが起動したら、自己紹介や説明は一切せず、以下だけ�
 ---
 
 ## セットアップの全体ステップ
+
+### STEP 0：新しい店舗フォルダの作成（自動実行）
+
+ユーザーが「start my-app」と入力したら、まず自動で以下を実行する：
+
+1. `C:\Users\kouki\OneDrive\OZNONIX\オゾシフ\my-app\` 内の既存フォルダを確認
+2. 最後の番号の次の番号で新しいフォルダを作成（例：`0000my-app` があれば `0001my-app`）
+3. `C:\Users\kouki\my-app` から必要なファイルをすべてコピー
+
+**自動実行するコマンド例（0001my-appを作る場合）：**
+```bash
+mkdir "C:/Users/kouki/OneDrive/OZNONIX/オゾシフ/my-app/0001my-app"
+cp -r "C:/Users/kouki/my-app/src" "C:/Users/kouki/OneDrive/OZNONIX/オゾシフ/my-app/0001my-app/"
+cp -r "C:/Users/kouki/my-app/public" "C:/Users/kouki/OneDrive/OZNONIX/オゾシフ/my-app/0001my-app/"
+cp "C:/Users/kouki/my-app/package.json" "C:/Users/kouki/my-app/package-lock.json" "C:/Users/kouki/my-app/.gitignore" "C:/Users/kouki/my-app/wrangler.toml" "C:/Users/kouki/my-app/worker.js" "C:/Users/kouki/my-app/CLAUDE.md" "C:/Users/kouki/OneDrive/OZNONIX/オゾシフ/my-app/0001my-app/"
+```
+
+コピー完了後：
+```
+✅ 0001my-app を作成しました。
+フォルダ：C:\Users\kouki\OneDrive\OZNONIX\オゾシフ\my-app\0001my-app
+
+STEP 1 に進みます。
+```
+
+---
 
 ### STEP 1：メールアドレスの確認（手動）
 
@@ -65,12 +109,22 @@ Supabase でこの店舗用のプロジェクトを作成してください。
 5. 「Create new project」をクリック
 6. Settings → API を開く
 
-完了したら以下の2つを教えてください：
+完了したら以下の3つを教えてください：
 ・Project URL（例：https://xxxxxxxxxx.supabase.co）
 ・anon / public キー（長い文字列）
+・Supabase Access Token（以下の手順で取得）
+
+【Supabase Access Token の取得方法】
+1. supabase.com にログイン
+2. 右上のアイコン → 「Account」
+3. 左メニュー「Access Tokens」
+4. 「Generate new token」→ 名前を入力（例：shift-app）→「Generate token」
+5. 表示されたトークン（sbp_xxx...）をコピーしてメモ
+
+⚠️ このトークンは一度しか表示されません。必ずメモしてください！
 ```
 
-ユーザーから URL と anon key を受け取ったら、以下の**2ファイル**を自動で書き換える：
+ユーザーから URL・anon key・Access Token を受け取ったら、以下を自動実行する：
 
 **① `src/supabaseClient.js` の書き換え：**
 ```js
@@ -87,7 +141,17 @@ const SUPABASE_ANON_KEY = '受け取ったanon key';
 
 ※ `VAPID_PUBLIC_KEY` は全店舗共通のため変更しない。
 
-書き換え後「完了しました」と報告して STEP 3 へ。
+**③ Edge Function のデプロイ（自動実行）：**
+
+Project URL から ref を抽出する（例：`https://xxxxxxxxxx.supabase.co` → ref = `xxxxxxxxxx`）
+
+以下のコマンドを実行する（フォルダは `C:\Users\kouki\my-app`）：
+```bash
+cd C:\Users\kouki\my-app
+SUPABASE_ACCESS_TOKEN={受け取ったAccess Token} npx supabase functions deploy daily-notifications --project-ref {ref} --no-verify-jwt
+```
+
+完了後「完了しました」と報告して STEP 3 へ。
 
 ---
 
@@ -96,10 +160,10 @@ const SUPABASE_ANON_KEY = '受け取ったanon key';
 ```
 【STEP 3】ファイルの確認
 
-現在のフォルダの構成を確認します...
+作成したフォルダの構成を確認します...
 ```
 
-以下のファイル・フォルダが存在するか確認する：
+STEP 0 で作成した `○○○○my-app` フォルダ内に以下が存在するか確認する：
 
 **必須ファイル（srcフォルダ内）：**
 - `src/App.js`
@@ -234,39 +298,39 @@ git push -u origin main
 
 ---
 
-### STEP 5：Netlify の設定（手動案内）
+### STEP 5：Cloudflare Pages の設定（手動案内）
 
 ```
-【STEP 5】Netlify でアプリを公開
+【STEP 5】Cloudflare Pages でアプリを公開
 
-👉 https://www.netlify.com
+👉 https://dash.cloudflare.com/login
 
-1. 「Sign up」→「GitHub」でログイン
-2. 「Add new site」→「Import an existing project」
-3. 「GitHub」を選択 → さきほど作ったリポジトリを選択
-4. Build settings はそのまま（自動検出される）→「Deploy」をクリック
-
-デプロイが完了したら：
-5. サイトダッシュボード →「Project configuration」
-6. 「Environment variables」→「Add a variable」で以下を追加：
+1. ログイン（アカウントがなければ無料登録）
+2. 左メニュー「Workers & Pages」→「Create」をクリック
+3. 「Pages」タブ →「Connect to Git」をクリック
+4. 「GitHub」を選択 → さきほど作ったリポジトリを選択
+5. Build settings を以下のように設定：
 
 ┌─────────────────────────────────────────────────────┐
-│ Key: CI          Value: false                        │
+│ Framework preset : Create React App                  │
+│ Build command    : npm run build                     │
+│ Build output dir : build                             │
 └─────────────────────────────────────────────────────┘
 
+6. 「Save and Deploy」をクリック
+
 ※ SupabaseのURLとキーはSTEP2でファイルに直接書き込み済みのため、
-　 ここでの設定は不要です。
+　 環境変数の設定は不要です。
 
-7. 「Save」→「Trigger deploy」をクリック
-
-完了したらNetlifyのURL（例：https://○○.netlify.app）を教えてください。
+デプロイ完了（約2〜3分）後にURLが表示されます。
+完了したらCloudflareのURL（例：https://○○.pages.dev）を教えてください。
 ```
 
 ---
 
 ### STEP 6：cron-job.org の設定（手動案内）
 
-ユーザーからNetlifyのURLを受け取ったら：
+ユーザーからCloudflareのURLを受け取ったら：
 
 ```
 【STEP 6】Supabase 停止防止の設定
@@ -278,7 +342,7 @@ Supabaseが7日間で停止しないよう、定期アクセスを設定しま�
 1. 「CREATE CRONJOB」をクリック
 2. 以下を入力：
    ・Title：shift-app-ping
-   ・URL：{NetlifyのURL}
+   ・URL：{CloudflareのURL}
    ・Schedule：Every day at 9:00
 3. 「CREATE」をクリック
 
@@ -293,7 +357,7 @@ Supabaseが7日間で停止しないよう、定期アクセスを設定しま�
 【STEP 7】動作確認
 
 以下のURLにアクセスしてアプリが表示されるか確認してください：
-{NetlifyのURL}
+{CloudflareのURL}
 
 ✅ 表示された → セットアップ完了です！
 ❌ 表示されない → エラー内容を教えてください。一緒に解決します。
@@ -310,7 +374,7 @@ Supabaseが7日間で停止しないよう、定期アクセスを設定しま�
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 店舗名：{店舗名（わかれば）}
-アプリURL：{NetlifyのURL}
+アプリURL：{CloudflareのURL}
 GitHub：https://github.com/{ユーザー名}/{リポジトリ名}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -351,9 +415,9 @@ Netlifyが自動でビルドを開始します。約2〜3分でアプリに反�
 - `error: failed to push` → `git pull --rebase` を試してから再push
 - 認証エラー → 資格情報マネージャーから `git:https://github.com` を削除して再実行
 
-### Netlifyのビルドが失敗する場合
-- 環境変数（CI=false）が設定されているか確認
-- `src/supabaseClient.js` のURLとキーが正しいか確認（env varsは不使用）
+### Cloudflare Pagesのビルドが失敗する場合
+- Build command が `npm run build`、Output directory が `build` になっているか確認
+- `src/supabaseClient.js` のURLとキーが正しいか確認
 
 ### Supabaseに接続できない場合
 - `src/supabaseClient.js` のURLとkeyが正しいか確認
@@ -381,9 +445,9 @@ Netlifyが自動でビルドを開始します。約2〜3分でアプリに反�
 
 | ファイル | 役割 |
 |---|---|
-| `src/App.js` | メインアプリ（GAS_URL・VAPID_PUBLIC_KEY は全店舗共通でハードコード済み） |
+| `src/App.js` | メインアプリ（VAPID_PUBLIC_KEY は全店舗共通でハードコード済み） |
 | `src/supabaseClient.js` | Supabase接続情報（店舗ごとに書き換え必要） |
 | `public/service-worker.js` | PWA・プッシュ通知（SUPABASE_URL/KEYは店舗ごとに書き換え必要） |
 | `public/manifest.json` | PWAアプリ情報（変更不要） |
 | `public/_redirects` | NetlifyのSPAルーティング設定（変更不要） |
-| `wrangler.toml` | Cloudflare Pages設定（Netlify使用時は不要） |
+| `wrangler.toml` | Cloudflare Pages設定（name・pages_build_output_dir が設定済み） |

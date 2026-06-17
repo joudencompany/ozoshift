@@ -1044,6 +1044,10 @@ const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 const [confirmedTimes, setConfirmedTimes] = useState({});
 const [confirmedDates, setConfirmedDates] = useState({}); // 確定済み日付を管理
 const [lastConfirmedAt, setLastConfirmedAt] = useState(null); // 最後の確定日時
+const [showAddModal, setShowAddModal] = useState(false);
+const [addModalDate, setAddModalDate] = useState('');
+const [addSelectedUser, setAddSelectedUser] = useState('');
+const [allUsers, setAllUsers] = useState([]);
   useEffect(() => {
     fetchAvailableDates();
     fetchUsers();
@@ -1159,6 +1163,11 @@ const [lastConfirmedAt, setLastConfirmedAt] = useState(null); // 最後の確定
         });
       }
       setUserMap(userMapTemp);
+      const userList = (users || [])
+        .filter(u => u.manager_number !== null && u.manager_number !== undefined && !u.is_deleted)
+        .map(u => ({ manager_number: u.manager_number, name: u.name || `ユーザー${u.manager_number}` }))
+        .sort((a, b) => a.manager_number - b.manager_number);
+      setAllUsers(userList);
     } catch (error) {
       console.error('予期しないエラー:', error);
     }
@@ -1312,7 +1321,7 @@ const fetchPendingModifications = async () => {
 
 // 現在のfetchAttendanceData関数（630行目付近）を以下のロジックで拡張:
 
-const fetchAttendanceData = async (date) => {
+const fetchAttendanceData = async (date, extraManagerNumber = null) => {
   if (!date) return;
   setLoading(true);
   try {
@@ -1503,6 +1512,32 @@ if (attendanceLogs) {
       return a.is_off === b.is_off ? 0 : a.is_off ? 1 : -1;
     });
 
+    if (extraManagerNumber && !sortedData.some(r => r.manager_number === extraManagerNumber)) {
+      const mn = extraManagerNumber;
+      const userName = userMap[mn] || userMap[String(mn)] || `ユーザー${mn}`;
+      sortedData.push({
+        manager_number: mn,
+        name: userName,
+        scheduled_start: '',
+        scheduled_end: '',
+        actual_start: null,
+        actual_end: null,
+        confirmed_start: '',
+        confirmed_end: '',
+        confirmed_break: 60,
+        break_minutes: 60,
+        break_periods: [],
+        store: '',
+        is_off: false,
+        attendance_id: null,
+        work_date: date,
+        transport_fee: '',
+        support_transport_fee: '',
+        expense_remarks: '',
+        expense_id: null,
+      });
+    }
+
     setAttendanceData(sortedData);
     setCurrentView('attendance');
   } catch (error) {
@@ -1610,10 +1645,49 @@ const handleConfirm = async () => {
     setLoading(false);
   }
 };
-  const handleDateSelect = (date) => {
-    if (!availableDates.includes(date)) return;
+  const handleDateSelect = (date, extraManagerNumber = null) => {
+    if (!extraManagerNumber && !availableDates.includes(date)) return;
     setSelectedDate(date);
-    fetchAttendanceData(date);
+    fetchAttendanceData(date, extraManagerNumber);
+  };
+
+  const handleAddUser = () => {
+    const mn = parseInt(addSelectedUser);
+    if (!mn) return;
+    if (currentView === 'attendance') {
+      if (attendanceData.some(r => r.manager_number === mn)) {
+        alert('このスタッフはすでに追加されています');
+        return;
+      }
+      const userName = userMap[mn] || userMap[String(mn)] || `ユーザー${mn}`;
+      setAttendanceData(prev => [...prev, {
+        manager_number: mn,
+        name: userName,
+        scheduled_start: '',
+        scheduled_end: '',
+        actual_start: null,
+        actual_end: null,
+        confirmed_start: '',
+        confirmed_end: '',
+        confirmed_break: 60,
+        break_minutes: 60,
+        break_periods: [],
+        store: '',
+        is_off: false,
+        attendance_id: null,
+        work_date: selectedDate,
+        transport_fee: '',
+        support_transport_fee: '',
+        expense_remarks: '',
+        expense_id: null,
+      }]);
+    } else {
+      if (!addModalDate) { alert('日付を選択してください'); return; }
+      handleDateSelect(addModalDate, mn);
+    }
+    setShowAddModal(false);
+    setAddSelectedUser('');
+    setAddModalDate('');
   };
 
  const handleBackToCalendar = () => {
@@ -1710,6 +1784,36 @@ const changeDate = (delta) => {
   return (
     <div className="login-wrapper">
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} content={getManagerHelpContent(currentHelpPage)} />
+      {showAddModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', maxWidth: '360px', width: '90%', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#1976D2' }}>👤 スタッフを追加</h3>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 'bold', fontSize: '0.9rem' }}>日付</label>
+              <input type="date" value={addModalDate} onChange={(e) => setAddModalDate(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px', fontSize: '1rem', boxSizing: 'border-box' }} />
+            </div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 'bold', fontSize: '0.9rem' }}>スタッフを選択</label>
+              <select value={addSelectedUser} onChange={(e) => setAddSelectedUser(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px', fontSize: '1rem', boxSizing: 'border-box' }}>
+                <option value="">選択してください</option>
+                {allUsers.map(u => <option key={u.manager_number} value={u.manager_number}>{u.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={handleAddUser} disabled={!addSelectedUser || !addModalDate}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: addSelectedUser && addModalDate ? '#1976D2' : '#ccc', color: 'white', border: 'none', borderRadius: '4px', cursor: addSelectedUser && addModalDate ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}>
+                追加
+              </button>
+              <button onClick={() => { setShowAddModal(false); setAddSelectedUser(''); setAddModalDate(''); }}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="login-card" style={{ width: '600px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
         <HelpButton onClick={() => { setCurrentHelpPage('calendar'); setShowHelp(true); }} />
         {showDownloadModal && (
@@ -1822,7 +1926,7 @@ const changeDate = (delta) => {
     }}
     disabled
   >
-    退勤管理モード
+    勤怠確定モード
   </button>
             
     
@@ -2629,7 +2733,18 @@ const changeDate = (delta) => {
             </div>
           </div>
 
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setShowAddModal(true)} style={{
+              backgroundColor: '#1976D2',
+              color: 'white',
+              padding: '0.75rem 2rem',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}>
+              ＋ 追加
+            </button>
             <button onClick={onBack} style={{
               backgroundColor: '#607D8B',
               color: 'white',
@@ -2650,6 +2765,33 @@ const changeDate = (delta) => {
   return (
     <div className="login-wrapper">
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} content={getManagerHelpContent(currentHelpPage)} />
+      {showAddModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '1.5rem', maxWidth: '360px', width: '90%', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#1976D2' }}>👤 スタッフを追加</h3>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: 'bold', fontSize: '0.9rem' }}>スタッフを選択</label>
+              <select value={addSelectedUser} onChange={(e) => setAddSelectedUser(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid #ddd', borderRadius: '4px', fontSize: '1rem', boxSizing: 'border-box' }}>
+                <option value="">選択してください</option>
+                {allUsers
+                  .filter(u => !attendanceData.some(r => r.manager_number === u.manager_number))
+                  .map(u => <option key={u.manager_number} value={u.manager_number}>{u.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={handleAddUser} disabled={!addSelectedUser}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: addSelectedUser ? '#1976D2' : '#ccc', color: 'white', border: 'none', borderRadius: '4px', cursor: addSelectedUser ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}>
+                追加
+              </button>
+              <button onClick={() => { setShowAddModal(false); setAddSelectedUser(''); }}
+                style={{ flex: 1, padding: '0.75rem', backgroundColor: '#9E9E9E', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="login-card" style={{ width: '900px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
         <HelpButton onClick={() => { setCurrentHelpPage('attendance'); setShowHelp(true); }} />
         <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
@@ -2659,7 +2801,7 @@ const changeDate = (delta) => {
         </h2>
        
         <p style={{ textAlign: 'center', color: '#666' }}>
-          モード: <strong>退勤管理</strong>
+          モード: <strong>勤怠確定</strong>
           {lastConfirmedAt && (
             <span style={{ marginLeft: '1rem', fontSize: '0.9rem', color: '#4CAF50' }}>
               最終確定: {new Date(lastConfirmedAt).toLocaleString('ja-JP', {
@@ -3012,8 +3154,21 @@ const changeDate = (delta) => {
           </div>
         )}
 
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-         
+        <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{
+              backgroundColor: '#1976D2',
+              color: 'white',
+              padding: '0.75rem 2rem',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            ＋ 追加
+          </button>
 <button
   onClick={handleConfirm}  // ✅ 変更
   disabled={loading}

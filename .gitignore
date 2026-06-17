@@ -34,3 +34,4 @@ screenshots/
 create_meeting_pptx.cjs
 create_pptx.cjs
 take_screenshots.mjs
+sim-full.mjs

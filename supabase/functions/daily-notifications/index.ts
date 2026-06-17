@@ -206,6 +206,86 @@ Deno.serve(async (req) => {
     }
   }
 
+  // === 3b. シフト未提出者への通知（期限3日前〜当日、毎日9時） ===
+  if (currentHour === 9) {
+    const { data: settingRow3b } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'shift_deadline_notice')
+      .single();
+
+    if (settingRow3b) {
+      const s3b = JSON.parse(settingRow3b.value);
+      if (s3b.is_active && s3b.deadline && s3b.period_start && s3b.period_end) {
+        const deadlineDate3b = new Date(s3b.deadline + 'T00:00:00+09:00');
+        const threeDaysBefore = new Date(deadlineDate3b);
+        threeDaysBefore.setDate(threeDaysBefore.getDate() - 3);
+        const threeDaysBeforeStr = `${threeDaysBefore.getFullYear()}-${pad(threeDaysBefore.getMonth()+1)}-${pad(threeDaysBefore.getDate())}`;
+
+        if (todayStr >= threeDaysBeforeStr && todayStr <= s3b.deadline) {
+          // push登録済み全スタッフ
+          const { data: allPushSubs3b } = await supabase
+            .from('push_subscriptions')
+            .select('manager_number, subscription');
+
+          if (allPushSubs3b && allPushSubs3b.length > 0) {
+            // 対象期間に1件以上提出済みのスタッフを取得
+            const { data: submittedShifts } = await supabase
+              .from('shifts')
+              .select('manager_number')
+              .gte('date', s3b.period_start)
+              .lte('date', s3b.period_end);
+
+            const submittedMNs = new Set(
+              (submittedShifts ?? []).map((s: { manager_number: string | number }) => Number(s.manager_number))
+            );
+
+            // 未提出スタッフのみ絞り込み
+            const notSubmittedSubs = allPushSubs3b.filter(
+              sub => !submittedMNs.has(Number(sub.manager_number))
+            );
+
+            const todayDate = new Date(todayStr + 'T00:00:00+09:00');
+            const daysLeft = Math.round((deadlineDate3b.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+            const title = '📋 シフト未提出のお知らせ';
+            const body = daysLeft === 0
+              ? `本日が期限です！シフトを提出してください（期間：${s3b.period_start}〜${s3b.period_end}）`
+              : `シフト提出期限まであと${daysLeft}日です（期限：${s3b.deadline}）`;
+
+            for (const sub of notSubmittedSubs) {
+              // 当日すでに同じ通知を送っていたらスキップ
+              const { data: already } = await supabase
+                .from('notifications')
+                .select('id')
+                .eq('target_manager_number', String(sub.manager_number))
+                .eq('title', title)
+                .gte('created_at', `${todayStr}T00:00:00`)
+                .limit(1);
+              if (already && already.length > 0) {
+                results.push({ type: 'unsubmitted_reminder', manager_number: sub.manager_number, status: 'skipped_duplicate' });
+                continue;
+              }
+
+              const payload = JSON.stringify({ title, body });
+              try {
+                await webpush.sendNotification(JSON.parse(sub.subscription), payload);
+                await supabase.from('notifications').insert([{
+                  title,
+                  body,
+                  target_manager_number: String(sub.manager_number)
+                }]);
+                results.push({ type: 'unsubmitted_reminder', manager_number: sub.manager_number, status: 'sent' });
+              } catch (e: unknown) {
+                const err = e as { message?: string };
+                results.push({ type: 'unsubmitted_reminder', manager_number: sub.manager_number, status: 'failed', error: err.message });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   // === 4. 前日の打刻不完全警告（毎日9時に実行） ===
   if (currentHour === 9) {
     const { data: yesterdayLogs } = await supabase
