@@ -2877,7 +2877,8 @@ const changeDate = (delta) => {
       padding: '0.4rem',
       border: '1px solid #ddd',
       borderRadius: '4px',
-      fontSize: '1rem'
+      fontSize: '1rem',
+      boxSizing: 'border-box'
     }}
   />
 </td>
@@ -2897,7 +2898,8 @@ const changeDate = (delta) => {
       border: '1px solid #ddd',
       borderRadius: '4px',
       textAlign: 'center',
-      fontSize: '1rem'
+      fontSize: '1rem',
+      boxSizing: 'border-box'
     }}
   />
 </td>
@@ -2914,7 +2916,7 @@ const changeDate = (delta) => {
               {record.is_off ? <span style={{ color: '#999' }}>休み</span> : record.scheduled_end || '-'}
             </td>
             {/* 勤怠入力終了 */}
-            <td style={{ padding: '0.5rem', borderBottom: '1px dotted #ddd', textAlign: 'center', backgroundColor: record.actual_end ? '#FFEBEE' : 'transparent' }}>
+            <td style={{ padding: '0.5rem', border: '1px solid #ddd', textAlign: 'center', backgroundColor: record.actual_end ? '#FFEBEE' : 'transparent' }}>
               {record.actual_end ? record.actual_end.substring(0, 5) : '-'}
             </td>
            <td style={{ padding: '0.75rem', border: '1px solid #ddd' }}>
@@ -2950,10 +2952,10 @@ const changeDate = (delta) => {
                 <div style={{ textAlign: 'center', color: '#999' }}>-</div>
               )}
             </td>
-           <td style={{ 
-              padding: '0.75rem', 
-              borderBottom: '1px solid #eee', 
-              textAlign: 'center', 
+           <td style={{
+              padding: '0.75rem',
+              border: '1px solid #ddd',
+              textAlign: 'center',
               fontWeight: 'bold',
               fontSize: '1.1rem',
               color: workMinutes > 0 ? '#1976D2' : '#999'
@@ -3067,7 +3069,7 @@ const changeDate = (delta) => {
           
           {/* 確定時間行 */}
           <tr style={{ backgroundColor: '#FFF9C4' }}>
-  <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', textAlign: 'center' }} colSpan="2">
+  <td style={{ padding: '0.5rem', border: '1px solid #ddd', textAlign: 'center' }} colSpan="2">
     <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', fontWeight: 'bold' }}>
       ⏰ 確定開始
     </div>
@@ -3091,7 +3093,7 @@ const changeDate = (delta) => {
                 }}
               />
             </td>
-            <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', textAlign: 'center' }} colSpan="2">
+            <td style={{ padding: '0.5rem', border: '1px solid #ddd', textAlign: 'center' }} colSpan="2">
               <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', fontWeight: 'bold' }}>
                 ⏰ 確定終了
               </div>
@@ -3115,7 +3117,7 @@ const changeDate = (delta) => {
                 }}
               />
             </td>
-            <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', textAlign: 'center' }}>
+            <td style={{ padding: '0.5rem', border: '1px solid #ddd', textAlign: 'center' }}>
               <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', fontWeight: 'bold' }}>
                 ⏰ 確定休憩
               </div>

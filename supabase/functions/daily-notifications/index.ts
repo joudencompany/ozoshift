@@ -48,7 +48,8 @@ Deno.serve(async (req) => {
       .eq('is_off', false)
       .eq('is_boshu', false)
       .not('start_time', 'is', null)
-      .neq('start_time', '');
+      .neq('start_time', '')
+      .neq('start_time', '00:00:00'); // 時刻未設定（プレースホルダー）は除外
 
     debug.push({ check: 'tomorrow_shifts', date: tomorrowStr, count: shifts?.length ?? 0, error: shiftsErr?.message, data: shifts });
 
@@ -73,13 +74,14 @@ Deno.serve(async (req) => {
         const title = '📅 明日のシフトのお知らせ';
         const body = `明日（${tomorrowStr}）${timeInfo}のシフトが入っています`;
         const payload = JSON.stringify({ title, body });
+        // お知らせボードへの記録はpush成否に関わらず必ず行う
+        await supabase.from('notifications').insert([{
+          title,
+          body,
+          target_manager_number: String(sub.manager_number)
+        }]);
         try {
           await webpush.sendNotification(JSON.parse(sub.subscription), payload);
-          await supabase.from('notifications').insert([{
-            title,
-            body,
-            target_manager_number: String(sub.manager_number)
-          }]);
           results.push({ type: 'tomorrow_reminder', manager_number: sub.manager_number, status: 'sent' });
         } catch (e: unknown) {
           const err = e as { message?: string };
@@ -94,23 +96,26 @@ Deno.serve(async (req) => {
   {
     const nextHour = currentHour + 1;
 
-    // 深夜日またぎはスキップ
-    if (nextHour < 24) {
-      const nextHourStr = pad(nextHour);
-      const rangeStart = `${nextHourStr}:00:00`;
-      const rangeEnd   = `${nextHourStr}:59:59`;
+    // 日またぎ（23時 → 翌0時）対応
+    const targetDate = nextHour >= 24 ? tomorrowStr : todayStr;
+    const targetHour = nextHour >= 24 ? 0 : nextHour;
+    const nextHourStr = pad(targetHour);
+    const rangeStart = `${nextHourStr}:00:00`;
+    const rangeEnd   = `${nextHourStr}:59:59`;
 
+    // 00:00:00 は時刻未設定データのため除外
+    if (rangeStart !== '00:00:00') {
       const { data: todayShifts, error: todayErr } = await supabase
         .from('final_shifts')
         .select('manager_number, start_time, end_time')
-        .eq('date', todayStr)
+        .eq('date', targetDate)
         .eq('is_off', false)
         .eq('is_boshu', false)
         .gte('start_time', rangeStart)
         .lte('start_time', rangeEnd)
         .not('start_time', 'is', null);
 
-      debug.push({ check: '1hour_shifts', date: todayStr, rangeStart, rangeEnd, count: todayShifts?.length ?? 0, error: todayErr?.message, data: todayShifts });
+      debug.push({ check: '1hour_shifts', date: targetDate, rangeStart, rangeEnd, count: todayShifts?.length ?? 0, error: todayErr?.message, data: todayShifts });
 
       if (todayShifts && todayShifts.length > 0) {
         const managerNumbers = [...new Set(todayShifts.map((s: { manager_number: string | number }) => s.manager_number))];
@@ -149,13 +154,14 @@ Deno.serve(async (req) => {
           }
 
           const payload = JSON.stringify({ title, body });
+          // お知らせボードへの記録はpush成否に関わらず必ず行う
+          await supabase.from('notifications').insert([{
+            title,
+            body,
+            target_manager_number: String(sub.manager_number)
+          }]);
           try {
             await webpush.sendNotification(JSON.parse(sub.subscription), payload);
-            await supabase.from('notifications').insert([{
-              title,
-              body,
-              target_manager_number: String(sub.manager_number)
-            }]);
             results.push({ type: '1hour_reminder', manager_number: sub.manager_number, status: 'sent' });
           } catch (e: unknown) {
             const err = e as { message?: string };
